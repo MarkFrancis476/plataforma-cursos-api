@@ -3,8 +3,8 @@
 Este proyecto es una API REST para una plataforma de cursos online, desarrollada como parte de la Tarea 2. La solución está construida siguiendo los principios de la Programación Orientada a Objetos y una Arquitectura Limpia.
 
 ## Autores
-*   [Tu Nombre Completo]
-*   [Nombre de tu Compañero (si aplica)]
+*   Isaias Aaron Couoh Cauich
+*   Isaac Emmanuel Ciau Aguilar
 
 ## Tecnologías Utilizadas
 *   **.NET 8**: Framework de desarrollo.
@@ -24,7 +24,7 @@ El proyecto sigue una Arquitectura Limpia dividida en cuatro capas:
 
 ## URL de la API Desplegada
 La API está desplegada y se puede acceder a través de la siguiente URL:
-**[Pega aquí la URL pública que te dé Railway]**
+**https://plataforma-cursos-api-production.up.railway.app/swagger/index.html**
 
 ## Cómo Ejecutar el Proyecto Localmente
 1.  Clonar el repositorio: `git clone [URL_DEL_REPO]`
