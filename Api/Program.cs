@@ -1,41 +1,55 @@
+using Application.Contracts.Persistence;
+using Infrastructure.Persistence.DatabaseContext;
+using Infrastructure.Persistence.Repositories;
+using Microsoft.EntityFrameworkCore;
+using System.Reflection; // Necesario para MediatR
+
+// --- 1. Crear el constructor de la aplicación ---
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
 
+// --- 2. Configurar los servicios en el contenedor de Inyección de Dependencias ---
+
+// Añadimos el servicio de controladores para que la API sepa cómo manejarlos.
+builder.Services.AddControllers();
+
+// Añadimos el DbContext al contenedor.
+builder.Services.AddDbContext<PlataformaCursosDbContext>(options =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("PlataformaCursosConnection");
+    options.UseNpgsql(connectionString);
+});
+
+// Registramos el UnitOfWork. Cuando se pida un IUnitOfWork, se creará una instancia de UnitOfWork.
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// Registramos MediatR, buscando los handlers en el proyecto Application.
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.Load("Application")));
+
+// Añadimos los servicios de Swagger para la documentación interactiva.
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+
+// --- 3. Construir la aplicación ---
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
 
-//app.UseHttpsRedirection();
+// --- 4. Configurar el pipeline de peticiones HTTP ---
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+// Usamos Swagger y SwaggerUI siempre para facilitar el desarrollo.
+app.UseSwagger();
+app.UseSwaggerUI();
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+// Comentamos la redirección a HTTPS para evitar problemas en local.
+// app.UseHttpsRedirection();
 
+// Habilitamos la autorización (aunque no la usemos todavía).
+app.UseAuthorization();
+
+// Le decimos a la aplicación que use los endpoints definidos en nuestros controladores.
+app.MapControllers();
+
+
+// --- 5. Ejecutar la aplicación ---
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
