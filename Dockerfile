@@ -1,20 +1,21 @@
-# --- Etapa 1: Build (Construcción) ---
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# Etapa 1: Restaurar dependencias
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS restore
 WORKDIR /src
-
-# Copiamos TODOS los archivos del proyecto al contenedor.
 COPY . .
+RUN dotnet restore "PlataformaCursos.sln"
 
-# Nos enfocamos directamente en el proyecto de la API para la publicación.
-# El comando 'publish' se encargará de restaurar, construir y empaquetar
-# el proyecto Api y todas sus dependencias (Application, Domain, Infrastructure).
+# Etapa 2: Construir el proyecto
+FROM restore AS build
+WORKDIR /src
+RUN dotnet build "PlataformaCursos.sln" -c Release --no-restore
+
+# Etapa 3: Publicar el proyecto de la API
+FROM build AS publish
 WORKDIR /src/Api
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet publish "Api.csproj" -c Release -o /app/publish --no-build
 
-
-# --- Etapa 2: Final (Ejecución) ---
+# Etapa 4: Crear la imagen final de ejecución
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
-COPY --from=build /app/publish .
-# El punto de entrada sigue siendo la DLL del proyecto Api.
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Api.dll"]
