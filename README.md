@@ -4,7 +4,6 @@ Este proyecto es una API REST para una plataforma de cursos online, desarrollada
 
 ## Autores
 *   Isaias Aaron Couoh Cauich
-*   Isaac Emmanuel Ciau Aguilar
 
 ## Tecnologías Utilizadas
 *   **.NET 8**: Framework de desarrollo.
